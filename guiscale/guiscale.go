@@ -12,7 +12,7 @@ func (r GuiScale) SetGuiScale(h *Handler, number float64) {
 	var num win.DWORD
 	var bytesWritten win.SIZE_T
 
-	address := win.LPVOID(h.GameID() + 0x3E45030)
+	address := win.LPVOID(h.GameID() + 0x3E51CE8)
 
 	win.VirtualProtectEx(h.Handle(), address, 4, 0x40, &num)
 	win.WriteProcessMemory(h.Handle(), address, uintptr(unsafe.Pointer(&value)), 4, &bytesWritten)
