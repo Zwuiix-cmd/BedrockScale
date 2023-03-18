@@ -1,4 +1,4 @@
-package guiscale
+package scale
 
 import (
 	"github.com/TheTitanrain/w32"

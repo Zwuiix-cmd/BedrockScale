@@ -1,14 +1,15 @@
 package main
 
 import (
-	"fmt"
+	"LSD-Scale/scale"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/app"
+	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/widget"
 	"github.com/TheTitanrain/w32"
 	"github.com/kbinani/win"
-	"github.com/logrusorgru/aurora"
-	"github.com/mattn/go-colorable"
-	"github.com/zwuiix-cmd/guiscale-client/guiscale"
 	"golang.org/x/sys/windows"
-	"log"
+	"net/url"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -16,10 +17,7 @@ import (
 	"time"
 )
 
-func init() {
-	log.SetOutput(colorable.NewColorableStdout())
-
-}
+var isToggledGuiScale bool = false
 
 var (
 	c = make(chan os.Signal)
@@ -27,26 +25,20 @@ var (
 
 func main() {
 	signal.Notify(c, os.Interrupt, os.Kill, syscall.SIGTERM)
-
 	handler()
 }
 
-func handler() *guiscale.Handler {
-	h := guiscale.New()
+func handler() *scale.Handler {
+	h := scale.New()
 
-	win.SetConsoleTitle("LSD GuiScale - Diango#0001")
+	win.SetConsoleTitle("")
 	win.SetConsoleIcon(win.HICON(h.Handle()))
-
-	fmt.Println()
-	fmt.Println(aurora.Green("██████╗ ██╗   ██╗    ██╗     ███████╗██████╗ \n██╔══██╗╚██╗ ██╔╝    ██║     ██╔════╝██╔══██╗\n██████╔╝ ╚████╔╝     ██║     ███████╗██║  ██║\n██╔══██╗  ╚██╔╝      ██║     ╚════██║██║  ██║\n██████╔╝   ██║       ███████╗███████║██████╔╝\n╚═════╝    ╚═╝       ╚══════╝╚══════╝╚═════╝ \n                                             "))
-	fmt.Println()
 
 	open := func() bool {
 		return w32.FindWindowW(nil, windows.StringToUTF16Ptr("Minecraft")) != 0
 	}
 
 	for !open() {
-		fmt.Println(aurora.Red("Sorry, we could not find your game, we will open your game, then reopen the software..."))
 		cmd := exec.Command("explorer.exe", "shell:appsFolder\\Microsoft.MinecraftUWP_8wekyb3d8bbwe!App")
 		if err := cmd.Run(); err != nil {
 			os.Exit(-1)
@@ -58,16 +50,39 @@ func handler() *guiscale.Handler {
 		time.Sleep(time.Second * 1)
 		os.Exit(-1)
 	}
-	lunch(h)
+
+	start(h)
 	return h
 }
 
-func lunch(h *guiscale.Handler) {
-	start(h)
-}
+func start(h *scale.Handler) error {
+	a := app.New()
+	w := a.NewWindow("LSD-Scale - Zwuiix#0001")
 
-func start(h *guiscale.Handler) {
-	guiscale.GuiScale{}.SetGuiScale(h, 7.0)
-	fmt.Println(aurora.Green("Injection done, the size of the interface has been reduced!"))
-	time.Sleep(time.Second * 10)
+	var URL, _ = url.Parse("https://discord.gg/mpuWfXXwbD")
+	message := widget.NewHyperlink("Discord", URL)
+
+	separatorGuiScale := widget.NewSeparator()
+	toggleGuiScale := widget.NewCheck("Toggle Small GuiScale", func(bool2 bool) {
+		isToggledGuiScale = bool2
+		if isToggledGuiScale {
+			scale.GuiScale{}.SetGuiScale(h, 7.0)
+		} else {
+			scale.GuiScale{}.SetGuiScale(h, 3.0)
+		}
+	})
+
+	w.SetContent(container.NewVBox(
+		message,
+		separatorGuiScale,
+		toggleGuiScale,
+	))
+
+	w.Resize(fyne.NewSize(400, 100))
+	w.SetFixedSize(true)
+	w.SetMaster()
+	w.CenterOnScreen()
+	w.ShowAndRun()
+
+	return nil
 }
