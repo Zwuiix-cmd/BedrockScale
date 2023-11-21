@@ -12,7 +12,7 @@ func (r GuiScale) SetGuiScale(h *Handler, number float64) {
 	var num win.DWORD
 	var bytesWritten win.SIZE_T
 
-	addresses := [4]uintptr{0x3E4C030, 0x3F73100}
+	addresses := [4]uintptr{0x492A4A8}
 
 	for i := 0; i < len(addresses); i++ {
 		address := win.LPVOID(h.GameID() + addresses[i])
